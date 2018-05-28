@@ -11,26 +11,32 @@ import java.awt.image.DataBufferInt;
 
 import javax.swing.JFrame;
 
+import gameEngine.entities.Player;
 import gameEngine.graphics.Screen;
 import gameEngine.graphics.SpriteSheet;
+import gameEngine.level.Level;
 
 public class Game extends Canvas implements Runnable {
 	private static final long serialVersionUID = 1L;
 
-	public static int WIDTH = 300;
-	public static int HEIGHT = WIDTH / 16 * 9;
+	public static int WIDTH = 160;
+	public static int HEIGHT = WIDTH / 12 * 9;
 	public static int SCALE = 3;
 	public static String NAME = "Game";
 
 	private JFrame frame;
-	private boolean running = false;
+
+	public boolean running = false;
 	public int tickCount = 0;
-	private Screen screen;
-	public InputHandler inputHandler;
-	// Drawing image
+
 	private BufferedImage image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
-	// Accessing each pixels of image
-	public int[] pixels = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
+	private int[] pixels = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
+	private int[] colours = new int[6 * 6 * 6];
+
+	private Screen screen;
+	public InputHandler input;
+	public Level level;
+	public Player player;
 
 	public Game() {
 		Dimension size = new Dimension(WIDTH * SCALE, HEIGHT * SCALE);
@@ -52,8 +58,24 @@ public class Game extends Canvas implements Runnable {
 	}
 
 	public void init() {
-		screen = new Screen(WIDTH, HEIGHT, new SpriteSheet("/spritesheet.png"));
-		inputHandler = new InputHandler(this);
+		int index = 0;
+		for (int r = 0; r < 6; r++) {
+			for (int g = 0; g < 6; g++) {
+				for (int b = 0; b < 6; b++) {
+					int rr = (r * 255 / 5);
+					int gg = (g * 255 / 5);
+					int bb = (b * 255 / 5);
+
+					colours[index++] = rr << 16 | gg << 8 | bb;
+				}
+			}
+		}
+
+		screen = new Screen(WIDTH, HEIGHT, new SpriteSheet("/sprite_sheet.png"));
+		input = new InputHandler(this);
+		level = new Level("/levels/small_test_level.png");
+		player = new Player(level, 0, 0, input);
+		level.addEntity(player);
 	}
 
 	public synchronized void start() {
@@ -116,18 +138,7 @@ public class Game extends Canvas implements Runnable {
 	public void tick() {
 		tickCount++;
 
-		if (inputHandler.up.isPressed()) {
-			screen.yOffset--;
-		}
-		if (inputHandler.down.isPressed()) {
-			screen.yOffset++;
-		}
-		if (inputHandler.left.isPressed()) {
-			screen.xOffset--;
-		}
-		if (inputHandler.right.isPressed()) {
-			screen.xOffset++;
-		}
+		level.tick();
 	}
 
 	public void render() {
@@ -137,7 +148,29 @@ public class Game extends Canvas implements Runnable {
 			return;
 		}
 
-		screen.render(pixels, 0, WIDTH);
+		int xOffset = player.x - (screen.width / 2);
+		int yOffset = player.y - (screen.height / 2);
+
+		level.renderTile(screen, xOffset, yOffset);
+
+		// for (int x = 0; x < level.width; x++) {
+		// int colour = Colours.get(-1, -1, -1, 000);
+		// if (x % 10 == 0 && x != 0) {
+		// colour = Colours.get(-1, -1, -1, 500);
+		// }
+		// Font.render((x % 10) + "", screen, 0 + (x * 8), 0, colour);
+		// }
+
+		level.renderEntities(screen);
+
+		for (int y = 0; y < screen.height; y++) {
+			for (int x = 0; x < screen.width; x++) {
+				int colourCode = screen.pixels[x + y * screen.width];
+				if (colourCode < 255) {
+					pixels[x + y * WIDTH] = colours[colourCode];
+				}
+			}
+		}
 
 		Graphics g = bs.getDrawGraphics();
 
