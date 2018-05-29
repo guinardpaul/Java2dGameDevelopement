@@ -9,6 +9,7 @@ import java.util.List;
 import javax.imageio.ImageIO;
 
 import gameEngine.entities.Entity;
+import gameEngine.entities.PlayerMP;
 import gameEngine.graphics.Screen;
 import gameEngine.level.tiles.Tile;
 
@@ -130,6 +131,17 @@ public class Level {
 
 	public void addEntity(Entity e) {
 		this.entities.add(e);
+	}
+
+	public void removePlayerMP(String userName) {
+		int index = 0;
+		for (Entity e : entities) {
+			if (e instanceof PlayerMP && ((PlayerMP) e).getUsername().equalsIgnoreCase(userName)) {
+				break;
+			}
+			index++;
+		}
+		this.entities.remove(index);
 	}
 
 }

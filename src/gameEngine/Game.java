@@ -13,9 +13,13 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
 import gameEngine.entities.Player;
+import gameEngine.entities.PlayerMP;
 import gameEngine.graphics.Screen;
 import gameEngine.graphics.SpriteSheet;
 import gameEngine.level.Level;
+import gameEngine.net.GameClient;
+import gameEngine.net.GameServer;
+import gameEngine.net.packet.Packet00Login;
 
 public class Game extends Canvas implements Runnable {
 	private static final long serialVersionUID = 1L;
@@ -25,7 +29,7 @@ public class Game extends Canvas implements Runnable {
 	public static int SCALE = 3;
 	public static String NAME = "Game";
 
-	private JFrame frame;
+	public JFrame frame;
 
 	public boolean running = false;
 	public int tickCount = 0;
@@ -36,8 +40,13 @@ public class Game extends Canvas implements Runnable {
 
 	private Screen screen;
 	public InputHandler input;
+	public WindowHandler windowHandler;
 	public Level level;
 	public Player player;
+
+	// Multiplayer
+	public GameClient socketClient;
+	public GameServer socketServer;
 
 	public Game() {
 		Dimension size = new Dimension(WIDTH * SCALE, HEIGHT * SCALE);
@@ -74,14 +83,31 @@ public class Game extends Canvas implements Runnable {
 
 		screen = new Screen(WIDTH, HEIGHT, new SpriteSheet("/sprite_sheet.png"));
 		input = new InputHandler(this);
+		windowHandler = new WindowHandler(this);
 		level = new Level("/levels/water_test_level.png");
-		player = new Player(level, 0, 0, input, JOptionPane.showInputDialog(this, "Please enter a username"));
+		player = new PlayerMP(level, 100, 100, input, JOptionPane.showInputDialog(this, "Please enter a username"),
+				null, -1);
 		level.addEntity(player);
+		Packet00Login loginPacket = new Packet00Login(player.getUsername());
+
+		if (socketServer != null) {
+			socketServer.addConnection((PlayerMP) player, loginPacket);
+		}
+		// socketClient.sendData("ping".getBytes());
+		loginPacket.writeData(socketClient);
 	}
 
 	public synchronized void start() {
 		running = true;
 		new Thread(this).start();
+
+		if (JOptionPane.showConfirmDialog(this, "Do you want to run the server") == 0) {
+			socketServer = new GameServer(this);
+			socketServer.start();
+		}
+
+		socketClient = new GameClient(this, "localhost");
+		socketClient.start();
 	}
 
 	public synchronized void stop() {
@@ -129,7 +155,7 @@ public class Game extends Canvas implements Runnable {
 
 			if (System.currentTimeMillis() - lastTimer >= 1000) {
 				lastTimer += 1000;
-				System.out.println(ticks + " ticks, " + frames + " frames");
+				frame.setTitle(ticks + " ticks, " + frames + " frames");
 				frames = 0;
 				ticks = 0;
 			}
