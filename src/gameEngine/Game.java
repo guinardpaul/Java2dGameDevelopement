@@ -21,34 +21,71 @@ import gameEngine.net.GameClient;
 import gameEngine.net.GameServer;
 import gameEngine.net.packet.Packet00Login;
 
+/**
+ * The Main Class Game.
+ */
 public class Game extends Canvas implements Runnable {
+
+	/** The Constant serialVersionUID. */
 	private static final long serialVersionUID = 1L;
 
+	/** The width. */
 	public static int WIDTH = 160;
+
+	/** The height. */
 	public static int HEIGHT = WIDTH / 12 * 9;
+
+	/** The scale. */
 	public static int SCALE = 3;
+
+	/** The name. */
 	public static String NAME = "Game";
+
+	/** The game. */
 	public static Game game;
 
+	/** The frame. */
 	public JFrame frame;
 
+	/** The running. */
 	public boolean running = false;
+
+	/** The tick count. */
 	public int tickCount = 0;
 
+	/** The image. */
 	private BufferedImage image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
+
+	/** The pixels. */
 	private int[] pixels = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
+
+	/** The colours. */
 	private int[] colours = new int[6 * 6 * 6];
 
+	/** The screen. */
 	private Screen screen;
-	public InputHandler input;
-	public WindowHandler windowHandler;
-	public Level level;
-	public Player player;
 
+	/** The input. */
+	public InputHandler input;
+
+	/** The window handler. */
+	public WindowHandler windowHandler;
+
+	/** The level. */
+	public Level level;
+
+	/** The player. */
+	public Player player;
 	// Multiplayer
+	/** The socket client. */
 	public GameClient socketClient;
+
+	/** The socket server. */
 	public GameServer socketServer;
 
+	/**
+	 * Instantiates a new game.
+	 */
 	public Game() {
 		Dimension size = new Dimension(WIDTH * SCALE, HEIGHT * SCALE);
 		setPreferredSize(size);
@@ -68,6 +105,9 @@ public class Game extends Canvas implements Runnable {
 		frame.setVisible(true);
 	}
 
+	/**
+	 * Inits the Game.
+	 */
 	public void init() {
 		game = this;
 
@@ -91,7 +131,8 @@ public class Game extends Canvas implements Runnable {
 		player = new PlayerMP(level, 100, 100, input, JOptionPane.showInputDialog(this, "Please enter a username"),
 				null, -1);
 		level.addEntity(player);
-		Packet00Login loginPacket = new Packet00Login(player.getUsername());
+		Packet00Login loginPacket = new Packet00Login(player.getUsername(), player.x, player.y, player.getNumSteps(),
+				player.isMoving(), player.getMovingDir());
 
 		if (socketServer != null) {
 			socketServer.addConnection((PlayerMP) player, loginPacket);
@@ -100,6 +141,9 @@ public class Game extends Canvas implements Runnable {
 		loginPacket.writeData(socketClient);
 	}
 
+	/**
+	 * Start.
+	 */
 	public synchronized void start() {
 		running = true;
 		new Thread(this).start();
@@ -113,10 +157,18 @@ public class Game extends Canvas implements Runnable {
 		socketClient.start();
 	}
 
+	/**
+	 * Stop.
+	 */
 	public synchronized void stop() {
 		running = false;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Runnable#run()
+	 */
 	@Override
 	public void run() {
 		long lastTime = System.nanoTime();
@@ -165,12 +217,18 @@ public class Game extends Canvas implements Runnable {
 		}
 	}
 
+	/**
+	 * Tick.
+	 */
 	public void tick() {
 		tickCount++;
 
 		level.tick();
 	}
 
+	/**
+	 * Render.
+	 */
 	public void render() {
 		BufferStrategy bs = getBufferStrategy();
 		if (bs == null) {
@@ -213,6 +271,12 @@ public class Game extends Canvas implements Runnable {
 		bs.show();
 	}
 
+	/**
+	 * The main method.
+	 *
+	 * @param args
+	 *            the arguments
+	 */
 	public static void main(String[] args) {
 		new Game().start();
 	}

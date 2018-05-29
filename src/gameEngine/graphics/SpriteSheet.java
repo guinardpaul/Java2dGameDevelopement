@@ -5,12 +5,26 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
+/**
+ * The Class SpriteSheet.
+ */
 public class SpriteSheet {
 
+	/** The path. */
 	public String path;
+
+	/** The width, height. */
 	public int width, height;
+
+	/** The pixels. */
 	public int[] pixels;
 
+	/**
+	 * Instantiates a new sprite sheet.
+	 *
+	 * @param path
+	 *            the path
+	 */
 	public SpriteSheet(String path) {
 		BufferedImage image = null;
 

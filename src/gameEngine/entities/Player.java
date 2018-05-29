@@ -8,21 +8,54 @@ import gameEngine.graphics.Screen;
 import gameEngine.level.Level;
 import gameEngine.net.packet.Packet02Move;
 
+/**
+ * The Class Player.
+ */
 public class Player extends Mob {
 
+	/** The input. */
 	private InputHandler input;
+
+	/** The colour. */
 	private int colour = Colours.get(-1, 111, 145, 543);
+
+	/** The scale. */
 	private int scale = 1;
+
+	/** The is swimming. */
 	protected boolean isSwimming = false;
+
+	/** The tick count. */
 	private int tickCount = 0;
+
+	/** The username. */
 	private String username;
 
+	/**
+	 * Instantiates a new player.
+	 *
+	 * @param level
+	 *            the level
+	 * @param x
+	 *            the x
+	 * @param y
+	 *            the y
+	 * @param input
+	 *            the input
+	 * @param username
+	 *            the username
+	 */
 	public Player(Level level, int x, int y, InputHandler input, String username) {
 		super(level, "Player", x, y, 1);
 		this.input = input;
 		this.username = username;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gameEngine.entities.Mob#hasCollided(int, int)
+	 */
 	@Override
 	public boolean hasCollided(int xa, int ya) {
 		int xMin = 0;
@@ -49,14 +82,14 @@ public class Player extends Mob {
 				return true;
 			}
 		}
-
 		return false;
 	}
 
-	public String getUsername() {
-		return this.username;
-	}
-
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gameEngine.entities.Entity#tick()
+	 */
 	@Override
 	public void tick() {
 		int xa = 0;
@@ -80,7 +113,8 @@ public class Player extends Mob {
 			move(xa, ya);
 			isMoving = true;
 
-			Packet02Move packet = new Packet02Move(this.getUsername(), this.x, this.y);
+			Packet02Move packet = new Packet02Move(this.getUsername(), this.x, this.y, this.numSteps, this.isMoving,
+					this.movingDir);
 			packet.writeData(Game.game.socketClient);
 		} else {
 			isMoving = false;
@@ -95,6 +129,11 @@ public class Player extends Mob {
 		tickCount++;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gameEngine.entities.Entity#render(gameEngine.graphics.Screen)
+	 */
 	@Override
 	public void render(Screen screen) {
 		int xTile = 0;
@@ -147,6 +186,15 @@ public class Player extends Mob {
 			Font.render(username, screen, xOffset - ((username.length() - 1) / 2 * 8), yOffset - 10,
 					Colours.get(-1, -1, -1, 555), 1);
 		}
+	}
+
+	/**
+	 * Gets the username.
+	 *
+	 * @return the username
+	 */
+	public String getUsername() {
+		return this.username;
 	}
 
 }

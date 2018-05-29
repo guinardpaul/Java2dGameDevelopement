@@ -1,23 +1,48 @@
 package gameEngine.graphics;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class Screen.
+ */
 public class Screen {
 
+	/** The Constant MAP_WIDTH. */
 	public static final int MAP_WIDTH = 64;
+	
+	/** The Constant MAP_WIDTH_MASK. */
 	public static final int MAP_WIDTH_MASK = MAP_WIDTH - 1;
 
+	/** The Constant BIT_MIRROR_X. */
 	public static final byte BIT_MIRROR_X = 0x01;
+	
+	/** The Constant BIT_MIRROR_Y. */
 	public static final byte BIT_MIRROR_Y = 0x02;
 
+	/** The pixels. */
 	public int[] pixels;
 
+	/** The x offset. */
 	public int xOffset = 0;
+	
+	/** The y offset. */
 	public int yOffset = 0;
 
+	/** The width. */
 	public int width;
+	
+	/** The height. */
 	public int height;
 
+	/** The sheet. */
 	public SpriteSheet sheet;
 
+	/**
+	 * Instantiates a new screen.
+	 *
+	 * @param width the width
+	 * @param height the height
+	 * @param sheet the sheet
+	 */
 	public Screen(int width, int height, SpriteSheet sheet) {
 		this.width = width;
 		this.height = height;
@@ -26,6 +51,16 @@ public class Screen {
 		pixels = new int[width * height];
 	}
 
+	/**
+	 * Render.
+	 *
+	 * @param xPos the x pos
+	 * @param yPos the y pos
+	 * @param tile the tile
+	 * @param colour the colour
+	 * @param mirrorDir the mirror dir
+	 * @param scale the scale
+	 */
 	public void render(int xPos, int yPos, int tile, int colour, int mirrorDir, int scale) {
 		xPos -= xOffset;
 		yPos -= yOffset;
@@ -65,6 +100,12 @@ public class Screen {
 		}
 	}
 
+	/**
+	 * Sets the offset.
+	 *
+	 * @param x the x
+	 * @param y the y
+	 */
 	public void setOffset(int x, int y) {
 		xOffset = x;
 		yOffset = y;
