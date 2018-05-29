@@ -14,6 +14,7 @@ import gameEngine.net.packet.Packet;
 import gameEngine.net.packet.Packet.PacketTypes;
 import gameEngine.net.packet.Packet00Login;
 import gameEngine.net.packet.Packet01Disconnect;
+import gameEngine.net.packet.Packet02Move;
 
 public class GameServer extends Thread {
 
@@ -58,6 +59,7 @@ public class GameServer extends Thread {
 		Packet packet;
 		switch (type) {
 		default:
+			break;
 		case INVALID:
 			break;
 		case LOGIN:
@@ -72,6 +74,12 @@ public class GameServer extends Thread {
 			System.out.println("[" + address.getHostAddress() + ":" + port + "] "
 					+ ((Packet01Disconnect) packet).getUserName() + " has left...");
 			this.removeConnection((Packet01Disconnect) packet);
+			break;
+		case MOVE:
+			packet = new Packet02Move(data);
+			System.out.println(((Packet02Move) packet).getUserName() + " has moved to " + ((Packet02Move) packet).getX()
+					+ ", " + ((Packet02Move) packet).getY());
+			this.handleMove(((Packet02Move) packet));
 			break;
 		}
 	}
@@ -136,6 +144,15 @@ public class GameServer extends Thread {
 	public void sendDataToAllClients(byte[] data) {
 		for (PlayerMP p : connectedPlayers) {
 			sendData(data, p.ipAddress, p.port);
+		}
+	}
+
+	private void handleMove(Packet02Move packet) {
+		if (getPlayerMP(packet.getUserName()) != null) {
+			int index = getPlayerMPIndex(packet.getUserName());
+			this.connectedPlayers.get(index).x = packet.getX();
+			this.connectedPlayers.get(index).y = packet.getY();
+			packet.writeData(this);
 		}
 	}
 

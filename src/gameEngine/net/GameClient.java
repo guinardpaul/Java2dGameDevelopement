@@ -13,6 +13,7 @@ import gameEngine.net.packet.Packet;
 import gameEngine.net.packet.Packet.PacketTypes;
 import gameEngine.net.packet.Packet00Login;
 import gameEngine.net.packet.Packet01Disconnect;
+import gameEngine.net.packet.Packet02Move;
 
 public class GameClient extends Thread {
 
@@ -53,6 +54,7 @@ public class GameClient extends Thread {
 		Packet packet;
 		switch (type) {
 		default:
+			break;
 		case INVALID:
 			break;
 		case LOGIN:
@@ -68,6 +70,10 @@ public class GameClient extends Thread {
 					+ ((Packet01Disconnect) packet).getUserName() + " has left the game...");
 			game.level.removePlayerMP(((Packet01Disconnect) packet).getUserName());
 			break;
+		case MOVE:
+			packet = new Packet02Move(data);
+			handlePacket((Packet02Move) packet);
+			break;
 		}
 	}
 
@@ -78,6 +84,10 @@ public class GameClient extends Thread {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	private void handlePacket(Packet02Move packet) {
+		this.game.level.movePlayer(packet.getUserName(), packet.getX(), packet.getY());
 	}
 
 }
