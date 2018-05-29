@@ -89,6 +89,12 @@ public class Level {
 		for (Entity e : entities) {
 			e.tick();
 		}
+
+		for (Tile t : Tile.tiles) {
+			if (t == null)
+				break;
+			t.tick();
+		}
 	}
 
 	public void renderTile(Screen screen, int xOffset, int yOffset) {
